@@ -1,0 +1,26 @@
+stages:
+  - build
+  - package
+  - deploy
+
+build:
+  # only:
+  #   - master
+  #   - tags
+  stage: build
+  tags: 
+   - generic
+  script:
+    - npm install
+    - npm run build_development
+
+package:
+  stage: package
+  tags:
+    - generic
+  only:
+    - master
+    - tags
+  script:
+    - npm install
+    - npm run package

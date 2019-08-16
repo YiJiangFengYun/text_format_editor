@@ -1,0 +1,43 @@
+{
+  "name": "text_formatter",
+  "version": "0.0.0",
+  "description": "A editor to format text to multiple style subsets.",
+  "main": "build/main/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron . --ignorecache",
+    "build_development": "node builder",
+    "build_production": "node builder --production",
+    "_build_development": "tsc --build tsconfig.main.development.json && webpack --config webpack.config.development.js",
+    "_build_production": "tsc --build tsconfig.main.production.json && webpack --config webpack.config.production.js",
+    "package": "npm run build_production && electron-packager . --ignore=\"^((?!node_modules).)*(\\.gitignore|src|\\.vscode|tsconfig.*\\.json|webpack\\.config.*\\.js|builder|\\.gitlab-ci.yml|types|log.log|var).*$\" --overwrite --icon icon/icon_win32"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.4399doc.com:queen_rises/text_formatter.git"
+  },
+  "author": "luoyujiang",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/command-line-args": "^5.0.0",
+    "@types/fs-extra": "^8.0.0",
+    "command-line-args": "^5.1.1",
+    "electron": "^6.0.2",
+    "electron-packager": "^14.0.4",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@types/node": "^12.7.2",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.8.5",
+    "axios": "^0.19.0",
+    "eventemitter3": "^4.0.0",
+    "log4js": "^5.0.0",
+    "loglevel": "^1.6.3",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  }
+}
