@@ -3,17 +3,17 @@ body {
     overflow-y: hidden;
 }
 
+body, div {
+    margin: 0;
+    padding: 0;
+    
+}
+
 body, #root {
     width: 100vw;
     height: 100vh;
 }
 
-#app, #edit {
-    width: 100%;
-    height: 100%;
-}
-
-body, div {
-    margin: 0;
-    padding: 0;
+#text_area {
+    background: gray;
 }

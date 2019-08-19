@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as log from 'loglevel';
-import * as model from "../model";
+import { Edit } from "./edit";
 
 export class App extends React.Component<{}, {}> {
 
@@ -26,7 +26,11 @@ export class App extends React.Component<{}, {}> {
 
     public render() {
         return (
-            <div id="app">
+            <div id="app" style={{
+                width: "100%",
+                height: "100%",
+            }}>
+                <Edit />
             </div>
         );
     }
