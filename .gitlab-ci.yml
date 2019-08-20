@@ -11,7 +11,7 @@ build:
   tags: 
    - generic
   script:
-    - npm install
+    - npm install --registry http://192.168.51.151:27281 
     - npm run build_development
 
 package:
@@ -22,5 +22,5 @@ package:
     - master
     - tags
   script:
-    - npm install
+    - npm install --registry http://192.168.51.151:27281
     - npm run package
