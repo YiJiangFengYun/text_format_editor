@@ -4,10 +4,16 @@ import * as model from "../model";
 
 const fontSizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 
+function tranColorStringToNumber(colorStr: string) {
+    colorStr = colorStr.split("(")[1].split(")")[0];
+    let arr = colorStr.split(",");
+    return (Number(arr[2]) << 16) | (Number(arr[1]) << 8) | Number(arr[0]);
+}
+
 export class Edit extends React.Component<{}, {}> {
 
     private _color: string = "#ffffff";
-    private _size: number = fontSizes[0];
+    private _size: number = fontSizes[6];
     private _lastTextHtml: string;
     private _refTextArea: React.RefObject<HTMLDivElement> = React.createRef();
     public constructor(props: Readonly<{}>) {
@@ -111,12 +117,12 @@ export class Edit extends React.Component<{}, {}> {
             let format = formats[i];
             let subBegin = format.begin;
             let subEnd = format.end;
-            let subResult = "";
+            let subResult: any[] = [];
             for (let j = brStart; j < brCount; ++j) {
                 let index = brs[j];
                 if (index < subEnd) {
-                    subResult += text.substring(subBegin, index);
-                    subResult += "<br/>"
+                    subResult.push(text.substring(subBegin, index));
+                    subResult.push(<br key={j + 1}/>);
                     subBegin = index;
                     brStart = j + 1;
                 } else {
@@ -124,7 +130,7 @@ export class Edit extends React.Component<{}, {}> {
                     break;
                 }
             }
-            subResult += text.substring(subBegin, subEnd);
+            subResult.push(text.substring(subBegin, subEnd));
             let style: React.CSSProperties = {};
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
                 style.color = `#${format.color.toString(16)}`;
@@ -157,12 +163,12 @@ export class Edit extends React.Component<{}, {}> {
             if (! element.innerHTML) continue;
             let data: modFormatText.Data = modFormatText.create();
             let style = element.style;
-            let childNodes = element.children;
+            let childNodes = element.childNodes;
             let childNodeCount = childNodes.length;
             let text = "";
             for (let j = 0; j < childNodeCount; ++j) {
                 let childNode = childNodes.item(j);
-                if (childNode.tagName == "BR") {
+                if (childNode.nodeName == "BR") {
                     modFormatText.addBR(data, text.length);
                 } else {
                     text += childNode.nodeValue;
@@ -170,7 +176,7 @@ export class Edit extends React.Component<{}, {}> {
             }
             data.text = text;
             let format: modFormatText.Format = { begin: 0, end: text.length, types: 0 };
-            modFormatText.addFormatColor(format, Number(`0x${style.color.slice(1)}`));
+            modFormatText.addFormatColor(format, tranColorStringToNumber(style.color));
             modFormatText.addFormatSize(format, Number(style.fontSize.slice(0, style.fontSize.length - 2)));
             if (style.fontWeight === "bold") {
                 modFormatText.addFormats(format, modFormatText.FormatType.BOLD);
@@ -178,6 +184,7 @@ export class Edit extends React.Component<{}, {}> {
             if (style.fontStyle === "italic") {
                 modFormatText.addFormats(format, modFormatText.FormatType.ITALIC);
             }
+            data.formats[0] = format;
             datas.push(data);
         }
 
@@ -198,7 +205,8 @@ export class Edit extends React.Component<{}, {}> {
         let target = event.target;
         let innerHtml = (target as HTMLDivElement).innerHTML;
         if (this._lastTextHtml !== innerHtml) {
-
+            this._fromTextElements();
+            this.forceUpdate();
         }
     }
 
