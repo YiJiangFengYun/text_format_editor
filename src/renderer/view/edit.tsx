@@ -22,83 +22,84 @@ export class Edit extends React.Component<{}, {}> {
     }
 
     public render() {
-        return (
-            <div id="edit" style={{
-                width: "100%",
-                height: "100%",
-            }}>
-                <div 
-                    id="text_area" 
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}
-                    style={{
-                        display: "inline-block",
-                        width: "90%",
-                        height: "100%",
-                        color: this._color,
-                        fontSize: this._size,
-                        verticalAlign: "top",
-                    }}
-                    onFocus={this._onFocus.bind(this)}
-                    onBlur={this._onBlur.bind(this)}
-                    ref={this._refTextArea}
-                >
-                    {
-                        this._toTextElements()
-                    }
-                </div>
-                <div
-                    id="tool_area"
-                    style={{
-                        display: "inline-block",
-                        left: "90%",
-                        width: "10%",
-                        height: "100%",
-                        verticalAlign: "top",
-                    }}
-                >
-                    <div style={{
-                    }}>
-                        <span>Font color</span>
-                        <input 
-                            type="color" 
-                            value={`${this._color}`} 
-                            onChange={this._onColorChanged.bind(this)}
-                            style={
-                                {
-                                    width: "100%",
-                                    height: "50px",
-                                    margin: "0px",
-                                    border: "0px",
-                                    padding: "0px",
-                                }
-                            }
-                        ></input>
-                    </div>
-                    <div>
-                        <span>Font size</span>
-                        <select
-                            style={{ 
+        let textElements = this._toTextElements();
+        let result = <div id="edit" style={{
+            width: "100%",
+            height: "100%",
+        }}>
+            <div 
+                id="text_area" 
+                contentEditable={true}
+                suppressContentEditableWarning={true}
+                style={{
+                    display: "inline-block",
+                    width: "90%",
+                    height: "100%",
+                    color: this._color,
+                    fontSize: this._size,
+                    verticalAlign: "top",
+                }}
+                onFocus={this._onFocus.bind(this)}
+                onBlur={this._onBlur.bind(this)}
+                ref={this._refTextArea}
+            >
+                {
+                    textElements
+                }
+            </div>
+            <div
+                id="tool_area"
+                style={{
+                    display: "inline-block",
+                    left: "90%",
+                    width: "10%",
+                    height: "100%",
+                    verticalAlign: "top",
+                }}
+            >
+                <div style={{
+                }}>
+                    <span>Font color</span>
+                    <input 
+                        type="color" 
+                        value={`${this._color}`} 
+                        onChange={this._onColorChanged.bind(this)}
+                        style={
+                            {
                                 width: "100%",
                                 height: "50px",
                                 margin: "0px",
                                 border: "0px",
                                 padding: "0px",
-                                verticalAlign: "top",
-                            }}
-                            onChange={this._onSizeChanged.bind(this)}
-                            value={this._size}
-                        >
-                            {
-                                fontSizes.map((value) => {
-                                    return <option key={ value } value={ value }>{ value }</option>
-                                })
                             }
-                        </select>
-                    </div>
+                        }
+                    ></input>
+                </div>
+                <div>
+                    <span>Font size</span>
+                    <select
+                        style={{ 
+                            width: "100%",
+                            height: "50px",
+                            margin: "0px",
+                            border: "0px",
+                            padding: "0px",
+                            verticalAlign: "top",
+                        }}
+                        onChange={this._onSizeChanged.bind(this)}
+                        value={this._size}
+                    >
+                        {
+                            fontSizes.map((value) => {
+                                return <option key={ value } value={ value }>{ value }</option>
+                            })
+                        }
+                    </select>
                 </div>
             </div>
-        )
+        </div>
+    
+        return result;
     }
 
     private _toTextElements() {
@@ -118,19 +119,6 @@ export class Edit extends React.Component<{}, {}> {
             let subBegin = format.begin;
             let subEnd = format.end;
             let subResult: any[] = [];
-            for (let j = brStart; j < brCount; ++j) {
-                let index = brs[j];
-                if (index < subEnd) {
-                    subResult.push(text.substring(subBegin, index));
-                    subResult.push(<br key={j + 1}/>);
-                    subBegin = index;
-                    brStart = j + 1;
-                } else {
-                    brStart = j;
-                    break;
-                }
-            }
-            subResult.push(text.substring(subBegin, subEnd));
             let style: React.CSSProperties = {};
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
                 style.color = `#${format.color.toString(16)}`;
@@ -148,6 +136,20 @@ export class Edit extends React.Component<{}, {}> {
             } else {
                 style.fontStyle = `normal`;
             }
+            for (let j = brStart; j < brCount; ++j) {
+                let index = brs[j];
+                if (index < subEnd) {
+                    if (subBegin !== index) subResult.push(<span key={`span${subBegin}`}>{text.substring(subBegin, index)}</span>);
+                    subResult.push(<br key={`br${j + 1}`}/>);
+                    subBegin = index;
+                    brStart = j + 1;
+                } else {
+                    brStart = j;
+                    break;
+                }
+            }
+            subResult.push(<span key={`span${subBegin}`}>{text.substring(subBegin, subEnd)}</span>);
+            
             result[i] = <span key={i + 1} style={style}>{subResult}</span>;
         }
         return result;
@@ -160,7 +162,7 @@ export class Edit extends React.Component<{}, {}> {
         let len = children.length;
         for (let i = 0; i < len; ++i) {
             let element = children.item(i) as HTMLSpanElement;
-            if (! element.innerHTML) continue;
+            // if (! element.innerHTML) continue;
             let data: modFormatText.Data = modFormatText.create();
             let style = element.style;
             let childNodes = element.childNodes;
@@ -168,8 +170,19 @@ export class Edit extends React.Component<{}, {}> {
             let text = "";
             for (let j = 0; j < childNodeCount; ++j) {
                 let childNode = childNodes.item(j);
-                if (childNode.nodeName == "BR") {
+                if (childNode.nodeName === "BR") {
                     modFormatText.addBR(data, text.length);
+                } else if (childNode.nodeName === "SPAN") {
+                    let childNodes2 = childNode.childNodes;
+                    let childNodes2Count = childNodes2.length;
+                    for (let k = 0; k < childNodes2Count; ++k) {
+                        let childNode2 = childNodes2[k];
+                        if (childNode2.nodeName === "BR") {
+                            modFormatText.addBR(data, text.length);
+                        } else {
+                            text += childNode2.nodeValue;
+                        }
+                    }
                 } else {
                     text += childNode.nodeValue;
                 }
