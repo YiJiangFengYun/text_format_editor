@@ -16,19 +16,22 @@ export class Edit extends React.Component<{}, {}> {
     private _size: number = fontSizes[6];
     private _lastTextHtml: string;
     private _refTextArea: React.RefObject<HTMLDivElement> = React.createRef();
+    private _renderCount = 0;
     public constructor(props: Readonly<{}>) {
         super(props);
 
     }
 
     public render() {
-        let textElements = this._toTextElements();
+        let renderCount = ++this._renderCount;
+        let textElements = this._toTextElements(renderCount);
         let result = <div id="edit" style={{
             width: "100%",
             height: "100%",
         }}>
             <div 
                 id="text_area" 
+                key={`text_area_${renderCount}`}
                 contentEditable={true}
                 suppressContentEditableWarning={true}
                 style={{
@@ -102,7 +105,8 @@ export class Edit extends React.Component<{}, {}> {
         return result;
     }
 
-    private _toTextElements() {
+    private _toTextElements(renderCount: number) {
+        console.log("To text elements: ");
         let formatText = model.model.formatText;
         let data = formatText.data;
         let text = data.text;
@@ -111,6 +115,8 @@ export class Edit extends React.Component<{}, {}> {
         let brs = data.brs;
         let brCount = brs.length;
         let brStart = 0;
+        
+        let brElementCount = 0;
 
         let result: JSX.Element[] = [];
         result.length = formatCount;
@@ -139,8 +145,14 @@ export class Edit extends React.Component<{}, {}> {
             for (let j = brStart; j < brCount; ++j) {
                 let index = brs[j];
                 if (index < subEnd) {
-                    if (subBegin !== index) subResult.push(<span key={`span${subBegin}`}>{text.substring(subBegin, index)}</span>);
-                    subResult.push(<br key={`br${j + 1}`}/>);
+                    if (subBegin !== index) {
+                        let temp = text.substring(subBegin, index);
+                        subResult.push(<span key={`r${renderCount}_span${subBegin}`}>{temp}</span>);
+                        console.log(temp);
+                    }
+                    subResult.push(<br key={`r${renderCount}_br${j + 1}`}/>);
+                    console.log("br");
+                    ++brElementCount;
                     subBegin = index;
                     brStart = j + 1;
                 } else {
@@ -148,14 +160,20 @@ export class Edit extends React.Component<{}, {}> {
                     break;
                 }
             }
-            subResult.push(<span key={`span${subBegin}`}>{text.substring(subBegin, subEnd)}</span>);
+            let temp = text.substring(subBegin, subEnd);
+            subResult.push(<span key={`r${renderCount}_span${subBegin}`}>{temp}</span>);
+            console.log(temp);
             
-            result[i] = <span key={i + 1} style={style}>{subResult}</span>;
+            result[i] = <span key={`r${renderCount}_stylespan${i + 1}`} style={style}>{subResult}</span>;
         }
+
+        console.log(`Break element ${brElementCount}`);
+
         return result;
     }
 
     private _fromTextElements() {
+        console.log("From text elements: ");
         let children = this._refTextArea.current.children;
         let formatText = model.model.formatText;
         let datas: modFormatText.Data[] = [];
@@ -206,6 +224,7 @@ export class Edit extends React.Component<{}, {}> {
         for (let i = 1; i < len; ++i) {
             formatText.append(datas[i]);
         }
+        console.log(`Format text: ${formatText.toString()}`);
     }
 
     private _onFocus(event: FocusEvent) {
