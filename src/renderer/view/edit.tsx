@@ -3,6 +3,8 @@ import * as modFormatText from "format_text";
 import * as model from "../model";
 
 const fontSizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+const defaultSize = fontSizes[6];
+const defaultColor = 0xffffff;
 
 function tranColorStringToNumber(colorStr: string) {
     if (colorStr[0] === "#") {
@@ -30,21 +32,22 @@ function tranColorNumberToString(colorNum: number) {
     return `#${redStr}${greenStr}${blueStr}`;
 }
 
-export class Edit extends React.Component<{}, {}> {
+export class Edit extends React.Component<{}, { color: string, size: number }> {
 
-    private _color: string = "#ffffff";
-    private _size: number = fontSizes[6];
     private _lastTextHtml: string;
     private _refTextArea: React.RefObject<HTMLDivElement> = React.createRef();
-    private _renderCount = 0;
+    private _textVersion = 0;
     public constructor(props: Readonly<{}>) {
         super(props);
-
+        this.state = {
+            color: tranColorNumberToString(defaultColor),
+            size: defaultSize,
+        };
+        this._upTextVersion();
     }
 
     public render() {
-        let renderCount = ++this._renderCount;
-        let textElements = this._toTextElements(renderCount);
+        let textElements = this._toTextElements(this._textVersion);
         let result = <div id="edit" style={{
             width: "100%",
             height: "100%",
@@ -52,19 +55,19 @@ export class Edit extends React.Component<{}, {}> {
         }}>
             <div 
                 id="text_area" 
-                key={`text_area_${renderCount}`}
+                key={`text_area_${this._textVersion}`}
                 contentEditable={true}
                 suppressContentEditableWarning={true}
                 style={{
                     display: "inline-block",
                     width: "90%",
                     height: "100%",
-                    fontSize: this._size,
                     verticalAlign: "top",
                     boxSizing: "border-box",
                 }}
                 onFocus={this._onFocus.bind(this)}
                 onBlur={this._onBlur.bind(this)}
+                onMouseUp={this._onMouseUp.bind(this)}
                 ref={this._refTextArea}
             >
                 {
@@ -87,7 +90,7 @@ export class Edit extends React.Component<{}, {}> {
                     <span>Font color</span>
                     <input 
                         type="color" 
-                        value={`${this._color}`} 
+                        value={`${this.state.color}`} 
                         onChange={this._onColorChanged.bind(this)}
                         style={
                             {
@@ -112,7 +115,7 @@ export class Edit extends React.Component<{}, {}> {
                             verticalAlign: "top",
                         }}
                         onChange={this._onSizeChanged.bind(this)}
-                        value={this._size}
+                        value={this.state.size}
                     >
                         {
                             fontSizes.map((value) => {
@@ -127,7 +130,7 @@ export class Edit extends React.Component<{}, {}> {
         return result;
     }
 
-    private _toTextElements(renderCount: number) {
+    private _toTextElements(textVersion: number) {
         console.log("To text elements: ");
         let formatText = model.model.formatText;
         let data = formatText.data;
@@ -171,10 +174,10 @@ export class Edit extends React.Component<{}, {}> {
                 if (index < subEnd) {
                     if (subBegin !== index) {
                         let temp = text.substring(subBegin, index);
-                        subResult.push(<span key={`r${renderCount}_span${subBegin}`}>{temp}</span>);
+                        subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
                         console.log(temp);
                     }
-                    subResult.push(<br key={`r${renderCount}_br${j + 1}`}/>);
+                    subResult.push(<br key={`r${textVersion}_br${j + 1}`}/>);
                     console.log("br");
                     ++brElementCount;
                     subBegin = index;
@@ -185,10 +188,10 @@ export class Edit extends React.Component<{}, {}> {
                 }
             }
             let temp = text.substring(subBegin, subEnd);
-            subResult.push(<span key={`r${renderCount}_span${subBegin}`}>{temp}</span>);
+            subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
             console.log(temp);
             
-            result[i] = <span key={`r${renderCount}_stylespan${i + 1}`} style={style}>{subResult}</span>;
+            result[i] = <span key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
         }
 
         console.log(`Break element ${brElementCount}`);
@@ -249,6 +252,7 @@ export class Edit extends React.Component<{}, {}> {
             formatText.append(datas[i]);
         }
         console.log(`Format text: ${formatText.toString()}`);
+        this._upTextVersion();
     }
 
     private _applyColor(color: number) {
@@ -257,6 +261,7 @@ export class Edit extends React.Component<{}, {}> {
         let begin = selectedRange[0];
         let end = selectedRange[1];
         model.model.formatText.setColor(begin, end, color);
+        this._upTextVersion();
     }
 
     private _applySize(size: number) {
@@ -265,6 +270,11 @@ export class Edit extends React.Component<{}, {}> {
         let begin = selectedRange[0];
         let end = selectedRange[1];
         model.model.formatText.setSize(begin, end, size);
+        this._upTextVersion();
+    }
+
+    private _upTextVersion() {
+        ++this._textVersion;
     }
 
     private _getSelectedRange() {
@@ -479,22 +489,47 @@ export class Edit extends React.Component<{}, {}> {
     private _onBlur(event: FocusEvent) {
         let target = event.target;
         let innerHtml = (target as HTMLDivElement).innerHTML;
-        this._getSelectedRange();
         if (this._lastTextHtml !== innerHtml) {
             this._fromTextElements();
             this.forceUpdate();
         }
     }
 
+    private _onMouseUp() {
+        let selectedRange = this._getSelectedRange();
+        if (! selectedRange) return;
+        let formats = model.model.formatText.getFormats(selectedRange[0], selectedRange[1]);
+        let color: number;
+        let size: number;
+        if (! formats || formats.length !== 1) {
+            color = defaultColor;
+            size = defaultSize
+        } else {
+            if (formats[0].types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
+                color = formats[0].color;
+            } else {
+                color = defaultColor;
+            }
+            if (formats[0].types & modFormatText.getFormatTypeBits(modFormatText.FormatType.SIZE)) {
+                size = formats[0].size;
+            } else {
+                size = defaultSize;
+            }
+        }
+        this.setState({ color: tranColorNumberToString(color), size: size});
+    }
+
     private _onColorChanged(event: Event) {
-        this._color = (event.target as HTMLInputElement).value;
-        this._applyColor(tranColorStringToNumber(this._color));
+        let color = (event.target as HTMLInputElement).value;
+        this._applyColor(tranColorStringToNumber(color));
+        this.setState({ color: color });
         this.forceUpdate();
     }
 
     private _onSizeChanged(event: Event) {
-        this._size = Number((event.target as HTMLSelectElement).value);
-        this._applySize(this._size);
+        let size = Number((event.target as HTMLSelectElement).value);
+        this._applySize(size);
+        this.setState({ size: size });
         this.forceUpdate();
     }
 }
