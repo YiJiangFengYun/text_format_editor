@@ -28,6 +28,7 @@ export class Edit extends React.Component<{}, {}> {
         let result = <div id="edit" style={{
             width: "100%",
             height: "100%",
+            boxSizing: "content-box",
         }}>
             <div 
                 id="text_area" 
@@ -41,6 +42,7 @@ export class Edit extends React.Component<{}, {}> {
                     color: this._color,
                     fontSize: this._size,
                     verticalAlign: "top",
+                    boxSizing: "border-box",
                 }}
                 onFocus={this._onFocus.bind(this)}
                 onBlur={this._onBlur.bind(this)}
@@ -58,6 +60,7 @@ export class Edit extends React.Component<{}, {}> {
                     width: "10%",
                     height: "100%",
                     verticalAlign: "top",
+                    boxSizing: "border-box",
                 }}
             >
                 <div style={{
@@ -227,6 +230,205 @@ export class Edit extends React.Component<{}, {}> {
         console.log(`Format text: ${formatText.toString()}`);
     }
 
+    private _changeFormat(info: {
+        types: number,
+        color?: number,
+        size?: number,
+    }) {
+        
+    }
+
+    private _getSelectedRange() {
+        let selection = window.getSelection();
+        let anchorNode = selection.anchorNode;
+        let anchorOffset = selection.anchorOffset;
+        let focusNode = selection.focusNode;
+        let focusOffset = selection.focusOffset;
+        if (anchorNode.nodeName !== "#text") throw new Error("Anchor Node of the selection is not a text node.");
+        if (focusNode.nodeName !== "#text") throw new Error("Focus Node of the selection is not a text node.");
+        function chilrenIndexOf(children: NodeListOf<ChildNode>, node: Node) {
+            let len = children.length;
+            for (let i = 0; i < len; ++i) {
+                if (children.item(i) === node) return i;
+            }
+            return -1;
+        }
+        {
+            let textAreaNode = this._refTextArea.current;
+            let spanAnchor = anchorNode.parentNode as HTMLSpanElement;
+            let spanFocus = focusNode.parentNode as HTMLSpanElement;
+            let styleSpanAnchor = spanAnchor.parentNode as HTMLSpanElement;
+            let styleSpanFocus = spanFocus.parentNode as HTMLSpanElement;
+            let indexAnchor = chilrenIndexOf(styleSpanAnchor.childNodes, spanAnchor);
+            if (indexAnchor < 0) {
+                throw new Error("The span element is not a child of the style span element.");
+            }
+            let indexFocus = chilrenIndexOf(styleSpanFocus.childNodes, spanFocus);
+            if (indexFocus < 0) {
+                throw new Error("The span element is not a child of the style span element.");
+            }
+            
+            let indexStyleSpanAnchor = chilrenIndexOf(textAreaNode.childNodes, styleSpanAnchor);
+            if (indexStyleSpanAnchor < 0) {
+                throw new Error("The style span element is not a child of the text area.");
+            }
+            let indexStyleSpanFocus = chilrenIndexOf(textAreaNode.childNodes, styleSpanFocus);
+            if (indexStyleSpanFocus < 0) {
+                throw new Error("The style span element is not a child of the text area.");
+            }
+            let spanBegin: HTMLSpanElement;
+            let styleSpanBegin: HTMLSpanElement;
+            let spanEnd: HTMLSpanElement;
+            let styleSpanEnd: HTMLSpanElement;
+            let indexBegin: number;
+            let indexEnd: number;
+            let indexStyleBegin: number;
+            let indexStyleEnd: number;
+            let offsetBegin: number;
+            let offsetEnd: number;
+            if (indexStyleSpanAnchor <= indexStyleSpanFocus) {
+                styleSpanBegin = styleSpanAnchor;
+                styleSpanEnd = styleSpanFocus;
+                indexStyleBegin = indexStyleSpanAnchor;
+                indexStyleEnd = indexStyleSpanFocus;
+               
+                if (indexStyleSpanAnchor == indexStyleSpanFocus) {
+                    if (indexAnchor <= indexFocus) {
+                        spanBegin = spanAnchor;
+                        spanEnd = spanFocus;
+                        indexBegin = indexAnchor;
+                        indexEnd = indexFocus;
+                        if (indexAnchor == indexFocus) {
+                            if (anchorOffset <= focusOffset) {
+                                offsetBegin = anchorOffset;
+                                offsetEnd = focusOffset;
+                            } else {
+                                offsetBegin = focusOffset;
+                                offsetEnd = anchorOffset;
+                            }
+                        } else {
+                           offsetBegin = anchorOffset;
+                           offsetEnd = focusOffset;
+                        }
+                    } else {
+                        spanBegin = spanFocus;
+                        spanEnd = spanAnchor;
+                        offsetBegin = focusOffset;
+                        offsetEnd = anchorOffset;
+                        indexBegin = indexFocus;
+                        indexEnd = indexAnchor;
+                    }
+                } else {
+                    spanBegin = spanAnchor;
+                    spanEnd = spanFocus;
+                    offsetBegin = anchorOffset;
+                    offsetEnd = focusOffset;
+                    indexBegin = indexAnchor;
+                    indexEnd = indexFocus;
+                }
+            } else {
+                spanBegin = spanFocus;
+                styleSpanBegin = styleSpanFocus;
+                spanEnd = spanAnchor;
+                styleSpanEnd = styleSpanAnchor;
+                indexStyleBegin = indexStyleSpanFocus;
+                indexStyleEnd = indexStyleSpanAnchor;
+                offsetBegin = focusOffset;
+                offsetEnd = anchorOffset;
+                indexBegin = indexFocus;
+                indexEnd = indexAnchor;
+            }
+
+            let preStr = "";
+            let postStr = "";
+
+            //Prefix String
+            {
+                let beginStr = "";
+                let endStr = "";
+
+                //Begin string
+                {
+                    let childrenStyle = textAreaNode.childNodes;
+                    for (let i = 0; i < indexStyleBegin; ++i) {
+                        let childStyle = childrenStyle.item(i);
+                        let chilren = childStyle.childNodes;
+                        let childCount = chilren.length;
+                        for (let j = 0; j < childCount; ++j) {
+                            let child = chilren.item(j);
+                            if (child.nodeName == "SPAN") {
+                                beginStr += (child as HTMLSpanElement).innerText;
+                            }
+                        }
+                    }
+                }
+    
+                //End string
+                {
+                    
+                    let children = styleSpanBegin.childNodes;
+                    let index = indexBegin;
+                    for (let i = 0; i < index; ++i) {
+                        let child = children.item(i);
+                        if (child.nodeName == "SPAN") {
+                            endStr += (child as HTMLSpanElement).innerText;
+                        }
+                    }
+
+                    endStr += spanBegin.innerText.slice(0, offsetBegin);
+                }
+
+                preStr = beginStr + endStr;
+            }
+
+            //Post string
+            {
+
+                let beginStr = "";
+                let endStr = "";
+
+                //Begin string
+                {
+                    beginStr += spanEnd.innerText.slice(offsetEnd);
+
+                    let children = styleSpanEnd.childNodes;
+                    let childCount = children.length;
+                    let index = indexEnd;
+                    for (let i = index + 1; i < childCount; ++i) {
+                        let child = children.item(i);
+                        if (child.nodeName == "SPAN") {
+                            beginStr += (child as HTMLSpanElement).innerText;
+                        }
+                    }
+    
+                }
+
+                //End string.
+                {
+                    let childrenStyle = textAreaNode.childNodes;
+                    let childStyleCount = childrenStyle.length;
+                    for (let i = indexStyleEnd + 1; i < childStyleCount; ++i) {
+                        let childStyle = childrenStyle.item(i);
+                        let chilren = childStyle.childNodes;
+                        let childCount = chilren.length;
+                        for (let j = 0; j < childCount; ++j) {
+                            let child = chilren.item(j);
+                            if (child.nodeName == "SPAN") {
+                                endStr += (child as HTMLSpanElement).innerText;
+                            }
+                        }
+                    }
+                }
+
+                postStr = beginStr + endStr;
+            }
+
+             console.log(`Pre string: ${preStr}`);
+             console.log(`Post string: ${postStr}`);
+        }
+
+    }
+
     private _onFocus(event: FocusEvent) {
         let target = event.target;
         let innerHtml = (target as HTMLDivElement).innerHTML;
@@ -236,6 +438,7 @@ export class Edit extends React.Component<{}, {}> {
     private _onBlur(event: FocusEvent) {
         let target = event.target;
         let innerHtml = (target as HTMLDivElement).innerHTML;
+        this._getSelectedRange();
         if (this._lastTextHtml !== innerHtml) {
             this._fromTextElements();
             this.forceUpdate();

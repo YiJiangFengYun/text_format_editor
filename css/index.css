@@ -1,6 +1,7 @@
 body {
     overflow-x: hidden;
     overflow-y: hidden;
+    background-color: black;
 }
 
 body, div {
@@ -15,5 +16,5 @@ body, #root {
 }
 
 #text_area {
-    background: gray;
+    border: solid white 2px;
 }
