@@ -5,9 +5,23 @@ import * as model from "../model";
 const fontSizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 
 function tranColorStringToNumber(colorStr: string) {
-    colorStr = colorStr.split("(")[1].split(")")[0];
-    let arr = colorStr.split(",");
-    return (Number(arr[2]) << 16) | (Number(arr[1]) << 8) | Number(arr[0]);
+    if (colorStr[0] === "#") {
+        return Number(`0x${colorStr.slice(1)}`);
+    } else if (colorStr.slice(0, 3) === "rgb") {
+        colorStr = colorStr.split("(")[1].split(")")[0];
+        let arr = colorStr.split(",");
+        return (Number(arr[0]) << 16) | (Number(arr[1]) << 8) | Number(arr[2]);
+    } else {
+        console.error("Unkown color string.");
+        return 0;
+    }
+}
+
+function tranColorNumberToString(colorNum: number) {
+    let red = (colorNum >> 16) & 0xff;
+    let green = (colorNum >> 8) & 0xff;
+    let blue = colorNum & 0xff;
+    return `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
 }
 
 export class Edit extends React.Component<{}, {}> {
@@ -39,7 +53,6 @@ export class Edit extends React.Component<{}, {}> {
                     display: "inline-block",
                     width: "90%",
                     height: "100%",
-                    color: this._color,
                     fontSize: this._size,
                     verticalAlign: "top",
                     boxSizing: "border-box",
@@ -130,7 +143,9 @@ export class Edit extends React.Component<{}, {}> {
             let subResult: any[] = [];
             let style: React.CSSProperties = {};
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
-                style.color = `#${format.color.toString(16)}`;
+                let colorStr = tranColorNumberToString(format.color);
+                console.log(`Color string: ${colorStr}`);
+                style.color = colorStr;
             }
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.SIZE)) {
                 style.fontSize = `${format.size}px`;
@@ -230,12 +245,12 @@ export class Edit extends React.Component<{}, {}> {
         console.log(`Format text: ${formatText.toString()}`);
     }
 
-    private _changeFormat(info: {
-        types: number,
-        color?: number,
-        size?: number,
-    }) {
-        
+    private _applyColor(color: number) {
+        let selectedRange = this._getSelectedRange();
+        if ( ! selectedRange) return;
+        let begin = selectedRange[0];
+        let end = selectedRange[1];
+        model.model.formatText.setColor(begin, end, color);
     }
 
     private _getSelectedRange() {
@@ -244,8 +259,14 @@ export class Edit extends React.Component<{}, {}> {
         let anchorOffset = selection.anchorOffset;
         let focusNode = selection.focusNode;
         let focusOffset = selection.focusOffset;
-        if (anchorNode.nodeName !== "#text") throw new Error("Anchor Node of the selection is not a text node.");
-        if (focusNode.nodeName !== "#text") throw new Error("Focus Node of the selection is not a text node.");
+        if (anchorNode.nodeName !== "#text") {
+            console.warn("Anchor Node of the selection is not a text node.");
+            return null;
+        }
+        if (focusNode.nodeName !== "#text") {
+            console.warn("Focus Node of the selection is not a text node.");
+            return null;
+        }
         function chilrenIndexOf(children: NodeListOf<ChildNode>, node: Node) {
             let len = children.length;
             for (let i = 0; i < len; ++i) {
@@ -253,6 +274,8 @@ export class Edit extends React.Component<{}, {}> {
             }
             return -1;
         }
+        let begin: number;
+        let end: number;
         {
             let textAreaNode = this._refTextArea.current;
             let spanAnchor = anchorNode.parentNode as HTMLSpanElement;
@@ -425,8 +448,12 @@ export class Edit extends React.Component<{}, {}> {
 
              console.log(`Pre string: ${preStr}`);
              console.log(`Post string: ${postStr}`);
+
+             begin = preStr.length;
+             end = model.model.formatText.data.text.length - postStr.length;
         }
 
+        return [begin, end];
     }
 
     private _onFocus(event: FocusEvent) {
@@ -447,6 +474,7 @@ export class Edit extends React.Component<{}, {}> {
 
     private _onColorChanged(event: Event) {
         this._color = (event.target as HTMLInputElement).value;
+        this._applyColor(tranColorStringToNumber(this._color));
         this.forceUpdate();
     }
 
