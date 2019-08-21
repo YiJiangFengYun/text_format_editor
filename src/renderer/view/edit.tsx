@@ -21,7 +21,13 @@ function tranColorNumberToString(colorNum: number) {
     let red = (colorNum >> 16) & 0xff;
     let green = (colorNum >> 8) & 0xff;
     let blue = colorNum & 0xff;
-    return `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
+    let redStr = red.toString(16);
+    if (redStr.length < 2) redStr = "0" + redStr;
+    let greenStr = green.toString(16);
+    if (greenStr.length < 2) greenStr = "0" + greenStr;
+    let blueStr = blue.toString(16);
+    if (blueStr.length < 2) blueStr = "0" + blueStr;
+    return `#${redStr}${greenStr}${blueStr}`;
 }
 
 export class Edit extends React.Component<{}, {}> {
@@ -253,6 +259,14 @@ export class Edit extends React.Component<{}, {}> {
         model.model.formatText.setColor(begin, end, color);
     }
 
+    private _applySize(size: number) {
+        let selectedRange = this._getSelectedRange();
+        if ( ! selectedRange) return;
+        let begin = selectedRange[0];
+        let end = selectedRange[1];
+        model.model.formatText.setSize(begin, end, size);
+    }
+
     private _getSelectedRange() {
         let selection = window.getSelection();
         let anchorNode = selection.anchorNode;
@@ -480,6 +494,7 @@ export class Edit extends React.Component<{}, {}> {
 
     private _onSizeChanged(event: Event) {
         this._size = Number((event.target as HTMLSelectElement).value);
+        this._applySize(this._size);
         this.forceUpdate();
     }
 }
