@@ -1,6 +1,6 @@
 {
   "name": "text_formatter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A editor to format text to multiple style subsets.",
   "main": "build/main/index.js",
   "scripts": {
