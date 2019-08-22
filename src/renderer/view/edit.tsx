@@ -33,7 +33,13 @@ function tranColorNumberToString(colorNum: number) {
     return `#${redStr}${greenStr}${blueStr}`;
 }
 
-export class Edit extends React.Component<{}, { color: string, size: number, bold: boolean, italic: boolean }> {
+export class Edit extends React.Component<{}, { 
+    color: string, 
+    size: number, 
+    bold: boolean, 
+    italic: boolean,
+    backgroundColor: string,
+}> {
 
     private _lastTextHtml: string;
     private _refTextArea: React.RefObject<HTMLDivElement> = React.createRef();
@@ -45,6 +51,7 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
             size: defaultSize,
             bold: false,
             italic: false,
+            backgroundColor: "#000000",
         };
         this._upTextVersion();
     }
@@ -69,6 +76,7 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                     verticalAlign: "top",
                     boxSizing: "border-box",
                     position: "absolute",
+                    backgroundColor: state.backgroundColor,
                 }}
                 onFocus={this._onFocus.bind(this)}
                 onBlur={this._onBlur.bind(this)}
@@ -98,6 +106,24 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                         top: "0px",
                     }}
                 >
+                    <div style={{
+                    }}>
+                        <span className="tool title">Background color</span>
+                        <input 
+                            type="color" 
+                            value={`${state.backgroundColor}`} 
+                            onChange={this._onBackgroundColorChanged.bind(this)}
+                            style={
+                                {
+                                    width: "100%",
+                                    height: "50px",
+                                    margin: "0px",
+                                    border: "0px",
+                                    padding: "0px",
+                                }
+                            }
+                        ></input>
+                    </div>
                     <div style={{
                     }}>
                         <span className="tool title">Font color</span>
@@ -639,6 +665,11 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
             bold: bold,
             italic: italic,
         });
+    }
+
+    private _onBackgroundColorChanged(event: Event) {
+        let color = (event.target as HTMLInputElement).value;
+        this.setState({ backgroundColor: color });
     }
 
     private _onColorChanged(event: Event) {
