@@ -8,9 +8,9 @@
     "start": "electron . --ignorecache",
     "build_development": "node builder",
     "build_production": "node builder --production",
-    "_build_development": "tsc --build tsconfig.main.development.json && webpack --config webpack.config.development.js",
-    "_build_production": "tsc --build tsconfig.main.production.json && webpack --config webpack.config.production.js",
-    "package": "npm run build_production && electron-packager . --ignore=\"^((?!node_modules).)*(\\.gitignore|src|\\.vscode|tsconfig.*\\.json|webpack\\.config.*\\.js|builder|\\.gitlab-ci.yml|types|log.log|var).*$\" --overwrite --icon icon/icon_win32"
+    "_build_development": "webpack --config webpack.config.development.js",
+    "_build_production": "webpack --config webpack.config.production.js",
+    "package": "npm run build_production && electron-packager . --ignore=\".gitignore|src|node_modules|.vscode|tsconfig.*.json|webpack.*.js|builder|doc|.gitlab-ci.yml\" --overwrite --icon icon/icon_win32"
   },
   "repository": {
     "type": "git",
