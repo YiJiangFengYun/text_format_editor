@@ -77,6 +77,10 @@ export class Edit extends React.Component<{}, {
                     boxSizing: "border-box",
                     position: "absolute",
                     backgroundColor: state.backgroundColor,
+                    color: state.color,
+                    fontSize: state.size,
+                    fontWeight: state.bold ? "bold" : "normal",
+                    fontStyle: state.italic ? "italic" : "normal",
                 }}
                 onFocus={this._onFocus.bind(this)}
                 onBlur={this._onBlur.bind(this)}
