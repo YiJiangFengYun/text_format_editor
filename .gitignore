@@ -3,3 +3,4 @@ node_modules/
 var/
 build/
 log.log
+text_formatter-win32-x64/
