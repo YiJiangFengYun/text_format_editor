@@ -40,7 +40,7 @@ export class Menu extends eventEmitter.EventEmitter {
             role: "help",
             submenu: [
                 {
-                    label: "About Moonstar",
+                    label: "About Editor",
                     click: null,
                 }
             ]

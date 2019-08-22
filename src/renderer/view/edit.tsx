@@ -14,7 +14,7 @@ function tranColorStringToNumber(colorStr: string) {
         let arr = colorStr.split(",");
         return (Number(arr[0]) << 16) | (Number(arr[1]) << 8) | Number(arr[2]);
     } else {
-        console.error("Unkown color string.");
+        console.error(`Unkown color string: ${colorStr}`);
         return 0;
     }
 }
@@ -201,53 +201,72 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
 
     private _fromTextElements() {
         console.log("From text elements: ");
-        let children = this._refTextArea.current.children;
+        let childNodesOfTextArea = this._refTextArea.current.childNodes;
         let formatText = model.model.formatText;
         let datas: modFormatText.Data[] = [];
-        let len = children.length;
+        let len = childNodesOfTextArea.length;
         for (let i = 0; i < len; ++i) {
-            let element = children.item(i) as HTMLSpanElement;
-            // if (! element.innerHTML) continue;
-            let data: modFormatText.Data = modFormatText.create();
-            let style = element.style;
-            let childNodes = element.childNodes;
-            let childNodeCount = childNodes.length;
-            let text = "";
-            for (let j = 0; j < childNodeCount; ++j) {
-                let childNode = childNodes.item(j);
-                if (childNode.nodeName === "BR") {
-                    modFormatText.addBR(data, text.length);
-                } else if (childNode.nodeName === "SPAN") {
-                    let childNodes2 = childNode.childNodes;
-                    let childNodes2Count = childNodes2.length;
-                    for (let k = 0; k < childNodes2Count; ++k) {
-                        let childNode2 = childNodes2[k];
-                        if (childNode2.nodeName === "BR") {
-                            modFormatText.addBR(data, text.length);
-                        } else {
-                            text += childNode2.nodeValue;
+            let node = childNodesOfTextArea.item(i);
+            if (node.nodeName === "BR") {
+                //When all words of the text is deleted, all style spans will be replaced with a br.
+                continue;
+            } else if (node.nodeName === "#text") {
+                //When all words of the text is deleted then input words, words will be as pure text.
+                let data: modFormatText.Data = modFormatText.create(
+                    node.nodeValue, 
+                    this.state.size,
+                    tranColorStringToNumber(this.state.color),
+                );
+                datas.push(data);
+            } else {
+                let data: modFormatText.Data = modFormatText.create();
+                let element = node as HTMLSpanElement;
+                let style = element.style;
+                let childNodes = element.childNodes;
+                let childNodeCount = childNodes.length;
+                let text = "";
+                for (let j = 0; j < childNodeCount; ++j) {
+                    let childNode = childNodes.item(j);
+                    if (childNode.nodeName === "BR") {
+                        modFormatText.addBR(data, text.length);
+                    } else if (childNode.nodeName === "SPAN") {
+                        let childNodes2 = childNode.childNodes;
+                        let childNodes2Count = childNodes2.length;
+                        for (let k = 0; k < childNodes2Count; ++k) {
+                            let childNode2 = childNodes2[k];
+                            if (childNode2.nodeName === "BR") {
+                                modFormatText.addBR(data, text.length);
+                            } else {
+                                text += childNode2.nodeValue;
+                            }
                         }
+                    } else {
+                        text += childNode.nodeValue;
                     }
-                } else {
-                    text += childNode.nodeValue;
                 }
+                data.text = text;
+                let format: modFormatText.Format = { begin: 0, end: text.length, types: 0 };
+                //Style color may be undefined When all words of the text is deleted then directly input any words, words will be as pure text.
+                modFormatText.addFormatColor(format, tranColorStringToNumber(style.color || this.state.color));
+                modFormatText.addFormatSize(format, Number(style.fontSize.slice(0, style.fontSize.length - 2)));
+                if (style.fontWeight === "bold") {
+                    modFormatText.addFormats(format, modFormatText.FormatType.BOLD);
+                }
+                if (style.fontStyle === "italic") {
+                    modFormatText.addFormats(format, modFormatText.FormatType.ITALIC);
+                }
+                data.formats[0] = format;
+                datas.push(data);
             }
-            data.text = text;
-            let format: modFormatText.Format = { begin: 0, end: text.length, types: 0 };
-            modFormatText.addFormatColor(format, tranColorStringToNumber(style.color));
-            modFormatText.addFormatSize(format, Number(style.fontSize.slice(0, style.fontSize.length - 2)));
-            if (style.fontWeight === "bold") {
-                modFormatText.addFormats(format, modFormatText.FormatType.BOLD);
-            }
-            if (style.fontStyle === "italic") {
-                modFormatText.addFormats(format, modFormatText.FormatType.ITALIC);
-            }
-            data.formats[0] = format;
-            datas.push(data);
         }
 
         len = datas.length;
-        if (len > 0) formatText.init(datas[0]);
+        if (len > 0) {
+            formatText.init(datas[0]);
+        } else {
+            formatText.init();
+        }
+
         for (let i = 1; i < len; ++i) {
             formatText.append(datas[i]);
         }
