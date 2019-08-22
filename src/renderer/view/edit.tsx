@@ -126,7 +126,7 @@ export class Edit extends React.Component<{}, {
                     </div>
                     <div style={{
                     }}>
-                        <span className="tool title">Font color</span>
+                        <span className="tool title">Color</span>
                         <input 
                             type="color" 
                             value={`${state.color}`} 
@@ -143,7 +143,7 @@ export class Edit extends React.Component<{}, {
                         ></input>
                     </div>
                     <div>
-                        <span className="tool title">Font size</span>
+                        <span className="tool title">Size</span>
                         <select
                             style={{ 
                                 width: "100%",
