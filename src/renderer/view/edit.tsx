@@ -263,7 +263,7 @@ export class Edit extends React.Component<{}, {
                 if (index < subEnd) {
                     if (subBegin !== index) {
                         let temp = text.substring(subBegin, index);
-                        subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
+                        subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
                         console.log(temp);
                     }
                     subResult.push(<br key={`r${textVersion}_br${j + 1}`}/>);
@@ -277,10 +277,10 @@ export class Edit extends React.Component<{}, {
                 }
             }
             let temp = text.substring(subBegin, subEnd);
-            subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
+            subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
             console.log(temp);
             
-            result[i] = <span key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
+            result[i] = <span className="text_style_span" key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
         }
 
         console.log(`Break element ${brElementCount}`);
@@ -417,11 +417,11 @@ export class Edit extends React.Component<{}, {
         let anchorOffset = selection.anchorOffset;
         let focusNode = selection.focusNode;
         let focusOffset = selection.focusOffset;
-        if (anchorNode.nodeName !== "#text") {
+        if (! anchorNode || anchorNode.nodeName !== "#text") {
             console.warn("Anchor Node of the selection is not a text node.");
             return null;
         }
-        if (focusNode.nodeName !== "#text") {
+        if (! focusNode || focusNode.nodeName !== "#text") {
             console.warn("Focus Node of the selection is not a text node.");
             return null;
         }
@@ -437,9 +437,25 @@ export class Edit extends React.Component<{}, {
         {
             let textAreaNode = this._refTextArea.current;
             let spanAnchor = anchorNode.parentNode as HTMLSpanElement;
+            if (! spanAnchor.classList.contains("text_span")) {
+                console.warn("Selection anchor is not in a text span.");
+                return null;
+            }
             let spanFocus = focusNode.parentNode as HTMLSpanElement;
+            if (! spanFocus.classList.contains("text_span")) {
+                console.warn("Selection focus is not in a text span.");
+                return null;
+            }
             let styleSpanAnchor = spanAnchor.parentNode as HTMLSpanElement;
+            if (! styleSpanAnchor.classList.contains("text_style_span")) {
+                console.warn("Selection anchor is not in a text style span.");
+                return null;
+            }
             let styleSpanFocus = spanFocus.parentNode as HTMLSpanElement;
+            if (! styleSpanFocus.classList.contains("text_style_span")) {
+                console.warn("Selection focus is not in a text style span.");
+                return null;
+            }
             let indexAnchor = chilrenIndexOf(styleSpanAnchor.childNodes, spanAnchor);
             if (indexAnchor < 0) {
                 throw new Error("The span element is not a child of the style span element.");
