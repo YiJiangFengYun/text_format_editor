@@ -137,8 +137,8 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                                 margin: "0px",
                                 border: "0px",
                                 padding: "0px",
-                                width: "50px",
-                                height: "50px",
+                                width: "100%",
+                                height: "auto",
                             }
                         }
                         onClick={this._onClickBold.bind(this)}
@@ -154,8 +154,8 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                                 margin: "0px",
                                 border: "0px",
                                 padding: "0px",
-                                width: "50px",
-                                height: "50px",
+                                width: "100%",
+                                height: "auto",
                             }
                         }
                         onClick={this._onClickItalic.bind(this)}
