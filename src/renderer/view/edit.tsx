@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as modFormatText from "format_text";
 import * as model from "../model";
+import * as common from "../common";
 
 const fontSizes = [6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 const defaultSize = fontSizes[6];
@@ -67,6 +68,7 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                     height: "100%",
                     verticalAlign: "top",
                     boxSizing: "border-box",
+                    position: "absolute",
                 }}
                 onFocus={this._onFocus.bind(this)}
                 onBlur={this._onBlur.bind(this)}
@@ -77,92 +79,111 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                     textElements
                 }
             </div>
-            <div
-                id="tool_area"
-                style={{
-                    display: "inline-block",
-                    left: "90%",
-                    width: "10%",
-                    height: "100%",
-                    verticalAlign: "top",
-                    boxSizing: "border-box",
-                    backgroundColor: "white",
-                }}
-            >
-                <div style={{
-                }}>
-                    <span className="tool title">Font color</span>
-                    <input 
-                        type="color" 
-                        value={`${state.color}`} 
-                        onChange={this._onColorChanged.bind(this)}
-                        style={
-                            {
+            <div id="right_area"
+                 style={
+                     {
+                        display: "inline-block",
+                        left: "90%",
+                        width: "10%",
+                        height: "100%",
+                        verticalAlign: "top",
+                        boxSizing: "border-box",
+                        position: "absolute",
+                     }
+                 }>
+                <div
+                    id="tool_area"
+                    style={{
+                        position: "absolute",
+                        top: "0px",
+                    }}
+                >
+                    <div style={{
+                    }}>
+                        <span className="tool title">Font color</span>
+                        <input 
+                            type="color" 
+                            value={`${state.color}`} 
+                            onChange={this._onColorChanged.bind(this)}
+                            style={
+                                {
+                                    width: "100%",
+                                    height: "50px",
+                                    margin: "0px",
+                                    border: "0px",
+                                    padding: "0px",
+                                }
+                            }
+                        ></input>
+                    </div>
+                    <div>
+                        <span className="tool title">Font size</span>
+                        <select
+                            style={{ 
                                 width: "100%",
                                 height: "50px",
                                 margin: "0px",
                                 border: "0px",
                                 padding: "0px",
-                            }
-                        }
-                    ></input>
-                </div>
-                <div>
-                    <span className="tool title">Font size</span>
-                    <select
-                        style={{ 
-                            width: "100%",
-                            height: "50px",
-                            margin: "0px",
-                            border: "0px",
-                            padding: "0px",
-                            verticalAlign: "top",
-                        }}
-                        onChange={this._onSizeChanged.bind(this)}
-                        value={state.size}
-                    >
-                        {
-                            fontSizes.map((value) => {
-                                return <option key={ value } value={ value }>{ value }</option>
-                            })
-                        }
-                    </select>
-                </div>
-                <div>
-                    <div className="tool title">Bold</div>
-                    <img src="image/bold.png"
-                        style = {
+                                verticalAlign: "top",
+                            }}
+                            onChange={this._onSizeChanged.bind(this)}
+                            value={state.size}
+                        >
                             {
-                                backgroundColor: state.bold ? "gray" : "transparent",
-                                margin: "0px",
-                                border: "0px",
-                                padding: "0px",
-                                width: "100%",
-                                height: "auto",
+                                fontSizes.map((value) => {
+                                    return <option key={ value } value={ value }>{ value }</option>
+                                })
                             }
-                        }
-                        onClick={this._onClickBold.bind(this)}
-                    >
-                    </img>
+                        </select>
+                    </div>
+                    <div>
+                        <div className="tool title">Bold</div>
+                        <img src="image/bold.png"
+                            style = {
+                                {
+                                    backgroundColor: state.bold ? "gray" : "transparent",
+                                    margin: "0px",
+                                    border: "0px",
+                                    padding: "0px",
+                                    width: "100%",
+                                    height: "auto",
+                                }
+                            }
+                            onClick={this._onClickBold.bind(this)}
+                        >
+                        </img>
+                    </div>
+                    <div>
+                        <div className="tool title">Italic</div>
+                        <img src="image/italic.png"
+                            style = {
+                                {
+                                    backgroundColor: state.italic ? "gray" : "transparent",
+                                    margin: "0px",
+                                    border: "0px",
+                                    padding: "0px",
+                                    width: "100%",
+                                    height: "auto",
+                                }
+                            }
+                            onClick={this._onClickItalic.bind(this)}
+                        >
+                        </img>
+                    </div>
                 </div>
-                <div>
-                    <div className="tool title">Italic</div>
-                    <img src="image/italic.png"
-                        style = {
-                            {
-                                backgroundColor: state.italic ? "gray" : "transparent",
-                                margin: "0px",
-                                border: "0px",
-                                padding: "0px",
-                                width: "100%",
-                                height: "auto",
-                            }
-                        }
-                        onClick={this._onClickItalic.bind(this)}
-                    >
-                    </img>
+                <div id="export"
+                    style={{
+                        position: "absolute",
+                        bottom: "0px",
+                        textAlign: "center",
+                        width: "100%",
+                        height: "50px",
+                    }}>
+                    <button onClick={this._onExport.bind(this)}>Export</button>
                 </div>
             </div>
+            
         </div>
     
         return result;
@@ -646,5 +667,9 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
         this._applyItalic(italic);
         this.setState({ italic: italic });
         this.forceUpdate();
+    }
+
+    private _onExport() {
+        common.dataExport.export();
     }
 }

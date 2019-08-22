@@ -20,6 +20,10 @@ body, #root {
     border: solid white 2px;
 }
 
+#right_area {
+    background-color: white;
+}
+
 .tool.title {
     color: black;
 }

@@ -17,8 +17,8 @@ export const window: {
                 // resizable: false,
                 show: false,
                 webPreferences: {
-                    nodeIntegration: false
-                }
+                    nodeIntegration: true
+                },
             })
         
             // and load the index.html of the app.

@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 export class JsonIO {
     public static readFile(filePath: string, encoding: string) {
-        return new Promise((fulfill, reject) => {
+        return new Promise<string>((fulfill, reject) => {
             try {
                 let res = fs.readFileSync(filePath, encoding);
                 fulfill(res);
@@ -13,7 +13,7 @@ export class JsonIO {
     }
 
     public static writeFile(filePath:string, data: any, encoding: string) {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             try {
                 fs.writeFileSync(
                     filePath, 
