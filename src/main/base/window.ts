@@ -1,5 +1,6 @@
 import * as electron from "electron";
 import { logger } from "./logger";
+import { context } from "./context";
 
 export const window: {
     mainWindow: electron.BrowserWindow;
@@ -29,7 +30,9 @@ export const window: {
             })
         
             // Open the DevTools.
-            mainWindow.webContents.openDevTools()
+            if (context.debug) {
+                mainWindow.webContents.openDevTools()
+            }
         
             // Emitted when the window is closed.
             mainWindow.on('closed', function () {
