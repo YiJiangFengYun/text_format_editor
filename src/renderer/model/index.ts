@@ -8,7 +8,7 @@ export class Model {
     public formatText: modFormatText.FormatText = new modFormatText.FormatText();
 
     public constructor() {
-        this.formatText.init(modFormatText.create("Here input your text."));
+        this.formatText.init(modFormatText.create());
     }
 }
 
