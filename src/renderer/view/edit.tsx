@@ -32,7 +32,7 @@ function tranColorNumberToString(colorNum: number) {
     return `#${redStr}${greenStr}${blueStr}`;
 }
 
-export class Edit extends React.Component<{}, { color: string, size: number }> {
+export class Edit extends React.Component<{}, { color: string, size: number, bold: boolean, italic: boolean }> {
 
     private _lastTextHtml: string;
     private _refTextArea: React.RefObject<HTMLDivElement> = React.createRef();
@@ -42,11 +42,14 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
         this.state = {
             color: tranColorNumberToString(defaultColor),
             size: defaultSize,
+            bold: false,
+            italic: false,
         };
         this._upTextVersion();
     }
 
     public render() {
+        let state = this.state;
         let textElements = this._toTextElements(this._textVersion);
         let result = <div id="edit" style={{
             width: "100%",
@@ -83,14 +86,15 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
                     height: "100%",
                     verticalAlign: "top",
                     boxSizing: "border-box",
+                    backgroundColor: "white",
                 }}
             >
                 <div style={{
                 }}>
-                    <span>Font color</span>
+                    <span className="tool title">Font color</span>
                     <input 
                         type="color" 
-                        value={`${this.state.color}`} 
+                        value={`${state.color}`} 
                         onChange={this._onColorChanged.bind(this)}
                         style={
                             {
@@ -104,7 +108,7 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
                     ></input>
                 </div>
                 <div>
-                    <span>Font size</span>
+                    <span className="tool title">Font size</span>
                     <select
                         style={{ 
                             width: "100%",
@@ -115,7 +119,7 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
                             verticalAlign: "top",
                         }}
                         onChange={this._onSizeChanged.bind(this)}
-                        value={this.state.size}
+                        value={state.size}
                     >
                         {
                             fontSizes.map((value) => {
@@ -123,6 +127,40 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
                             })
                         }
                     </select>
+                </div>
+                <div>
+                    <div className="tool title">Bold</div>
+                    <img src="image/bold.png"
+                        style = {
+                            {
+                                backgroundColor: state.bold ? "gray" : "transparent",
+                                margin: "0px",
+                                border: "0px",
+                                padding: "0px",
+                                width: "50px",
+                                height: "50px",
+                            }
+                        }
+                        onClick={this._onClickBold.bind(this)}
+                    >
+                    </img>
+                </div>
+                <div>
+                    <div className="tool title">Italic</div>
+                    <img src="image/italic.png"
+                        style = {
+                            {
+                                backgroundColor: state.italic ? "gray" : "transparent",
+                                margin: "0px",
+                                border: "0px",
+                                padding: "0px",
+                                width: "50px",
+                                height: "50px",
+                            }
+                        }
+                        onClick={this._onClickItalic.bind(this)}
+                    >
+                    </img>
                 </div>
             </div>
         </div>
@@ -289,6 +327,32 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
         let begin = selectedRange[0];
         let end = selectedRange[1];
         model.model.formatText.setSize(begin, end, size);
+        this._upTextVersion();
+    }
+
+    private _applyBold(bold: boolean) {
+        let selectedRange = this._getSelectedRange();
+        if ( ! selectedRange) return;
+        let begin = selectedRange[0];
+        let end = selectedRange[1];
+        if (bold) {
+            model.model.formatText.setBold(begin, end);
+        } else {
+            model.model.formatText.unsetBold(begin, end);
+        }
+        this._upTextVersion();
+    }
+
+    private _applyItalic(italic: boolean) {
+        let selectedRange = this._getSelectedRange();
+        if ( ! selectedRange) return;
+        let begin = selectedRange[0];
+        let end = selectedRange[1];
+        if (italic) {
+            model.model.formatText.setItalic(begin, end);
+        } else {
+            model.model.formatText.unsetItalic(begin, end);
+        }
         this._upTextVersion();
     }
 
@@ -520,6 +584,8 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
         let formats = model.model.formatText.getFormats(selectedRange[0], selectedRange[1]);
         let color: number;
         let size: number;
+        let bold: boolean;
+        let italic: boolean;
         if (! formats || formats.length !== 1) {
             color = defaultColor;
             size = defaultSize
@@ -534,8 +600,24 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
             } else {
                 size = defaultSize;
             }
+            if (formats[0].types & modFormatText.getFormatTypeBits(modFormatText.FormatType.BOLD)) {
+                bold = true;
+            } else {
+                bold = false;
+            }
+            if (formats[0].types & modFormatText.getFormatTypeBits(modFormatText.FormatType.ITALIC)) {
+                italic = true;
+            } else {
+                italic = false;
+            }
+            
         }
-        this.setState({ color: tranColorNumberToString(color), size: size});
+        this.setState({ 
+            color: tranColorNumberToString(color), 
+            size: size,
+            bold: bold,
+            italic: italic,
+        });
     }
 
     private _onColorChanged(event: Event) {
@@ -549,6 +631,20 @@ export class Edit extends React.Component<{}, { color: string, size: number }> {
         let size = Number((event.target as HTMLSelectElement).value);
         this._applySize(size);
         this.setState({ size: size });
+        this.forceUpdate();
+    }
+
+    private _onClickBold() {
+        let bold = ! this.state.bold;
+        this._applyBold(bold)
+        this.setState({ bold: bold });
+        this.forceUpdate();
+    }
+
+    private _onClickItalic() {
+        let italic = ! this.state.italic;
+        this._applyItalic(italic);
+        this.setState({ italic: italic });
         this.forceUpdate();
     }
 }

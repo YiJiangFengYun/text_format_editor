@@ -19,3 +19,7 @@ body, #root {
 #text_area {
     border: solid white 2px;
 }
+
+.tool.title {
+    color: black;
+}
