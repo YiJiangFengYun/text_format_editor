@@ -288,10 +288,10 @@ export class Edit extends React.Component<{}, { color: string, size: number, bol
                 modFormatText.addFormatColor(format, tranColorStringToNumber(style.color || this.state.color));
                 modFormatText.addFormatSize(format, Number(style.fontSize.slice(0, style.fontSize.length - 2)));
                 if (style.fontWeight === "bold") {
-                    modFormatText.addFormats(format, modFormatText.FormatType.BOLD);
+                    modFormatText.addFormats(format, modFormatText.getFormatTypeBits(modFormatText.FormatType.BOLD));
                 }
                 if (style.fontStyle === "italic") {
-                    modFormatText.addFormats(format, modFormatText.FormatType.ITALIC);
+                    modFormatText.addFormats(format, modFormatText.getFormatTypeBits(modFormatText.FormatType.ITALIC));
                 }
                 data.formats[0] = format;
                 datas.push(data);
