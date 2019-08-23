@@ -23,5 +23,18 @@ body, #root {
 }
 
 .tool.title {
+    color: inherit;
+    cursor: default;
+}
+
+.button {
+    cursor: pointer;
+}
+
+.tool {
     color: black;
+}
+
+.tool:hover {
+    color: red;
 }

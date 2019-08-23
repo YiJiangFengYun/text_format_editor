@@ -111,10 +111,11 @@ export class Edit extends React.Component<{}, {
                         top: "0px",
                     }}
                 >
-                    <div style={{
+                    <div className="tool" style={{
                     }}>
                         <span className="tool title">Background color</span>
                         <input 
+                            className="tool item button"
                             type="color" 
                             value={`${state.backgroundColor}`} 
                             onChange={this._onBackgroundColorChanged.bind(this)}
@@ -129,10 +130,11 @@ export class Edit extends React.Component<{}, {
                             }
                         ></input>
                     </div>
-                    <div style={{
+                    <div className="tool" style={{
                     }}>
                         <span className="tool title">Color</span>
-                        <input 
+                        <input
+                            className="tool item button"
                             type="color" 
                             value={`${state.color}`} 
                             onChange={this._onColorChanged.bind(this)}
@@ -147,9 +149,10 @@ export class Edit extends React.Component<{}, {
                             }
                         ></input>
                     </div>
-                    <div>
+                    <div className="tool">
                         <span className="tool title">Size</span>
                         <select
+                            className="tool item button"
                             style={{ 
                                 width: "100%",
                                 height: "50px",
@@ -168,9 +171,11 @@ export class Edit extends React.Component<{}, {
                             }
                         </select>
                     </div>
-                    <div>
+                    <div className="tool">
                         <div className="tool title">Bold</div>
-                        <img src="image/bold.png"
+                        <img
+                            className="tool item button" 
+                            src="image/bold.png"
                             style = {
                                 {
                                     backgroundColor: state.bold ? "gray" : "transparent",
@@ -185,9 +190,11 @@ export class Edit extends React.Component<{}, {
                         >
                         </img>
                     </div>
-                    <div>
+                    <div className="tool">
                         <div className="tool title">Italic</div>
-                        <img src="image/italic.png"
+                        <img
+                            className="tool item button"
+                            src="image/italic.png"
                             style = {
                                 {
                                     backgroundColor: state.italic ? "gray" : "transparent",
@@ -211,8 +218,8 @@ export class Edit extends React.Component<{}, {
                         width: "100%",
                         height: "50px",
                     }}>
-                    <button onClick={this._onExport.bind(this)}>Export</button>
-                    <button onClick={this._onImport.bind(this)}>Import</button>
+                    <button id="export" className="button" onClick={this._onExport.bind(this)}>Export</button>
+                    <button id="import" className="button" onClick={this._onImport.bind(this)}>Import</button>
                 </div>
             </div>
             
