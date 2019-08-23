@@ -10,7 +10,7 @@
     "build_production": "node builder --production",
     "_build_development": "webpack --config webpack.config.development.js",
     "_build_production": "webpack --config webpack.config.production.js",
-    "package": "npm run build_production && electron-packager . --ignore=\".gitignore|src|node_modules|.vscode|tsconfig.*.json|webpack.*.js|builder|doc|.gitlab-ci.yml\" --overwrite --icon icon/icon_win32"
+    "package": "npm run build_production && electron-packager . --ignore=\".gitignore|src|node_modules|.vscode|tsconfig.*.json|webpack.*.js|builder|doc|.gitlab-ci.yml|log.log\" --overwrite --icon icon/icon_win32"
   },
   "repository": {
     "type": "git",
