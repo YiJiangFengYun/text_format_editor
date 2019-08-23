@@ -74,6 +74,8 @@ export class Menu extends eventEmitter.EventEmitter {
     private _resetAppMenu() {
         const menu = electron.Menu.buildFromTemplate(this.template);
         electron.Menu.setApplicationMenu(menu);
+        //Hiden (remove) menu
+        electron.Menu.setApplicationMenu(null);
     }
 }
 

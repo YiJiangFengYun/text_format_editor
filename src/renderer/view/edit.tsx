@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as log from 'loglevel';
 import * as modFormatText from "format_text";
 import * as model from "../model";
 import * as common from "../common";
@@ -15,7 +16,7 @@ function tranColorStringToNumber(colorStr: string) {
         let arr = colorStr.split(",");
         return (Number(arr[0]) << 16) | (Number(arr[1]) << 8) | Number(arr[2]);
     } else {
-        console.error(`Unkown color string: ${colorStr}`);
+        log.error(`Unkown color string: ${colorStr}`);
         return 0;
     }
 }
@@ -75,7 +76,7 @@ export class Edit extends React.Component<{}, {
                     height: "100%",
                     verticalAlign: "top",
                     boxSizing: "border-box",
-                    position: "absolute",
+                    // position: "absolute",
                     backgroundColor: state.backgroundColor,
                     color: state.color,
                     fontSize: state.size,
@@ -110,10 +111,11 @@ export class Edit extends React.Component<{}, {
                         top: "0px",
                     }}
                 >
-                    <div style={{
+                    <div className="tool" style={{
                     }}>
                         <span className="tool title">Background color</span>
                         <input 
+                            className="tool item button"
                             type="color" 
                             value={`${state.backgroundColor}`} 
                             onChange={this._onBackgroundColorChanged.bind(this)}
@@ -128,10 +130,11 @@ export class Edit extends React.Component<{}, {
                             }
                         ></input>
                     </div>
-                    <div style={{
+                    <div className="tool" style={{
                     }}>
                         <span className="tool title">Color</span>
-                        <input 
+                        <input
+                            className="tool item button"
                             type="color" 
                             value={`${state.color}`} 
                             onChange={this._onColorChanged.bind(this)}
@@ -146,9 +149,10 @@ export class Edit extends React.Component<{}, {
                             }
                         ></input>
                     </div>
-                    <div>
+                    <div className="tool">
                         <span className="tool title">Size</span>
                         <select
+                            className="tool item button"
                             style={{ 
                                 width: "100%",
                                 height: "50px",
@@ -167,9 +171,11 @@ export class Edit extends React.Component<{}, {
                             }
                         </select>
                     </div>
-                    <div>
+                    <div className="tool">
                         <div className="tool title">Bold</div>
-                        <img src="image/bold.png"
+                        <img
+                            className="tool item button" 
+                            src="image/bold.png"
                             style = {
                                 {
                                     backgroundColor: state.bold ? "gray" : "transparent",
@@ -184,9 +190,11 @@ export class Edit extends React.Component<{}, {
                         >
                         </img>
                     </div>
-                    <div>
+                    <div className="tool">
                         <div className="tool title">Italic</div>
-                        <img src="image/italic.png"
+                        <img
+                            className="tool item button"
+                            src="image/italic.png"
                             style = {
                                 {
                                     backgroundColor: state.italic ? "gray" : "transparent",
@@ -202,7 +210,7 @@ export class Edit extends React.Component<{}, {
                         </img>
                     </div>
                 </div>
-                <div id="export"
+                <div id="export_import"
                     style={{
                         position: "absolute",
                         bottom: "0px",
@@ -210,7 +218,8 @@ export class Edit extends React.Component<{}, {
                         width: "100%",
                         height: "50px",
                     }}>
-                    <button onClick={this._onExport.bind(this)}>Export</button>
+                    <button id="export" className="button" onClick={this._onExport.bind(this)}>Export</button>
+                    <button id="import" className="button" onClick={this._onImport.bind(this)}>Import</button>
                 </div>
             </div>
             
@@ -220,7 +229,6 @@ export class Edit extends React.Component<{}, {
     }
 
     private _toTextElements(textVersion: number) {
-        console.log("To text elements: ");
         let formatText = model.model.formatText;
         let data = formatText.data;
         let text = data.text;
@@ -242,7 +250,6 @@ export class Edit extends React.Component<{}, {
             let style: React.CSSProperties = {};
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
                 let colorStr = tranColorNumberToString(format.color);
-                console.log(`Color string: ${colorStr}`);
                 style.color = colorStr;
             }
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.SIZE)) {
@@ -263,11 +270,9 @@ export class Edit extends React.Component<{}, {
                 if (index < subEnd) {
                     if (subBegin !== index) {
                         let temp = text.substring(subBegin, index);
-                        subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
-                        console.log(temp);
+                        subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
                     }
                     subResult.push(<br key={`r${textVersion}_br${j + 1}`}/>);
-                    console.log("br");
                     ++brElementCount;
                     subBegin = index;
                     brStart = j + 1;
@@ -277,19 +282,15 @@ export class Edit extends React.Component<{}, {
                 }
             }
             let temp = text.substring(subBegin, subEnd);
-            subResult.push(<span key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
-            console.log(temp);
+            subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
             
-            result[i] = <span key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
+            result[i] = <span className="text_style_span" key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
         }
-
-        console.log(`Break element ${brElementCount}`);
 
         return result;
     }
 
     private _fromTextElements() {
-        console.log("From text elements: ");
         let childNodesOfTextArea = this._refTextArea.current.childNodes;
         let formatText = model.model.formatText;
         let datas: modFormatText.Data[] = [];
@@ -301,6 +302,9 @@ export class Edit extends React.Component<{}, {
                 continue;
             } else if (node.nodeName === "#text") {
                 //When all words of the text is deleted then input words, words will be as pure text.
+                if (typeof node.nodeValue !== "string") {
+                    throw new Error("The nodeValue of node is not a string.");
+                }
                 let data: modFormatText.Data = modFormatText.create(
                     node.nodeValue, 
                     this.state.size,
@@ -333,6 +337,9 @@ export class Edit extends React.Component<{}, {
                         text += childNode.nodeValue;
                     }
                 }
+                if (typeof text !== "string") {
+                    throw new Error("The final text is not a string.");
+                }
                 data.text = text;
                 let format: modFormatText.Format = { begin: 0, end: text.length, types: 0 };
                 //Style color may be undefined When all words of the text is deleted then directly input any words, words will be as pure text.
@@ -359,7 +366,6 @@ export class Edit extends React.Component<{}, {
         for (let i = 1; i < len; ++i) {
             formatText.append(datas[i]);
         }
-        console.log(`Format text: ${formatText.toString()}`);
         this._upTextVersion();
     }
 
@@ -417,12 +423,12 @@ export class Edit extends React.Component<{}, {
         let anchorOffset = selection.anchorOffset;
         let focusNode = selection.focusNode;
         let focusOffset = selection.focusOffset;
-        if (anchorNode.nodeName !== "#text") {
-            console.warn("Anchor Node of the selection is not a text node.");
+        if (! anchorNode || anchorNode.nodeName !== "#text") {
+            log.warn("Anchor Node of the selection is not a text node.");
             return null;
         }
-        if (focusNode.nodeName !== "#text") {
-            console.warn("Focus Node of the selection is not a text node.");
+        if (! focusNode || focusNode.nodeName !== "#text") {
+            log.warn("Focus Node of the selection is not a text node.");
             return null;
         }
         function chilrenIndexOf(children: NodeListOf<ChildNode>, node: Node) {
@@ -437,9 +443,25 @@ export class Edit extends React.Component<{}, {
         {
             let textAreaNode = this._refTextArea.current;
             let spanAnchor = anchorNode.parentNode as HTMLSpanElement;
+            if (! spanAnchor.classList.contains("text_span")) {
+                log.warn("Selection anchor is not in a text span.");
+                return null;
+            }
             let spanFocus = focusNode.parentNode as HTMLSpanElement;
+            if (! spanFocus.classList.contains("text_span")) {
+                log.warn("Selection focus is not in a text span.");
+                return null;
+            }
             let styleSpanAnchor = spanAnchor.parentNode as HTMLSpanElement;
+            if (! styleSpanAnchor.classList.contains("text_style_span")) {
+                log.warn("Selection anchor is not in a text style span.");
+                return null;
+            }
             let styleSpanFocus = spanFocus.parentNode as HTMLSpanElement;
+            if (! styleSpanFocus.classList.contains("text_style_span")) {
+                log.warn("Selection focus is not in a text style span.");
+                return null;
+            }
             let indexAnchor = chilrenIndexOf(styleSpanAnchor.childNodes, spanAnchor);
             if (indexAnchor < 0) {
                 throw new Error("The span element is not a child of the style span element.");
@@ -604,9 +626,6 @@ export class Edit extends React.Component<{}, {
                 postStr = beginStr + endStr;
             }
 
-             console.log(`Pre string: ${preStr}`);
-             console.log(`Post string: ${postStr}`);
-
              begin = preStr.length;
              end = model.model.formatText.data.text.length - postStr.length;
         }
@@ -706,5 +725,15 @@ export class Edit extends React.Component<{}, {
 
     private _onExport() {
         common.dataExport.export();
+    }
+
+    private _onImport() {
+        let context = this;
+        common.dataImport.import()
+        .then((res) => {
+            if (res) {
+                context.forceUpdate();
+            }
+        });
     }
 }
