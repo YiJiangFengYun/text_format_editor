@@ -1,14 +1,13 @@
 import * as log from "loglevel";
 import axios from "axios";
+import * as modCommon from "../../common";
 
 const CONTEXT_CONFIG_PATH = "build/context.json";
 
-export const context: {
-    logLevel: string;
-    init: () => void;
+export const context: modCommon.Context &  {
+    init: () => Promise<void>;
 } = {
-    logLevel: null,
-    init: () => {
+    init(): Promise<void> {
         return Promise.resolve()
         .then(() => {
             log.info("Initing the context.");
@@ -17,7 +16,7 @@ export const context: {
             return axios.get(CONTEXT_CONFIG_PATH);
         })
         .then((res) => {
-            context.logLevel = res.data.logLevel;
+            Object.assign(this, res.data);
         })
         .then(() => {
             log.info("Inited the context.");
