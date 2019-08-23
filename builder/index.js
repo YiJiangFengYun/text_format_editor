@@ -15,12 +15,17 @@ const optionDefinitions = [
 // parse option from command line args.
 const options = commandLineArgs(optionDefinitions);
 
+var version;
+
 Promise.resolve()
 .then(() => {
     return fsExtra.remove(BUILD_PATH);
 })
 .then(() => {
     return build();
+})
+.then(() => {
+    return readVersion();
 })
 .then(() => {
     return createContextConfig();
@@ -44,12 +49,27 @@ function build() {
     }
 }
 
+function readVersion() {
+    return new Promise((resolve, reject) => {
+        let packagePath = path.join(process.cwd(), "package.json");
+        fs.readFile(packagePath, "utf8", (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            let packageObj = JSON.parse(data);
+            version = packageObj.version;
+            resolve();
+        })
+    });
+}
+
 function createContextConfig() {
     return new Promise((resolve, reject) => {
         //create config js.
         let contextConfig = {
             debug: options.production ? false : true,
             logLevel: options.production ? "info" : "debug",
+            version: version,
         };
     
         let contextJsonPath = path.join(BUILD_PATH, "context.json");

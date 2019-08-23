@@ -38,3 +38,9 @@ body, #root {
 .tool:hover {
     color: red;
 }
+
+#version {
+    font-size: 12px;
+    color: gray;
+    cursor: default;
+}
