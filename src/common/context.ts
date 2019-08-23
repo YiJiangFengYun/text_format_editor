@@ -1,4 +1,5 @@
 export interface Context {
-    debug: boolean;
-    logLevel: string;
+    debug?: boolean;
+    logLevel?: string;
+    version?: string;
 }

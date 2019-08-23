@@ -105,7 +105,7 @@ export class Edit extends React.Component<{}, {
                      }
                  }>
                 <div
-                    id="tool_area"
+                    id="right_top_area"
                     style={{
                         position: "absolute",
                         top: "0px",
@@ -210,16 +210,29 @@ export class Edit extends React.Component<{}, {
                         </img>
                     </div>
                 </div>
-                <div id="export_import"
+                <div id="right_bottom_area"
                     style={{
                         position: "absolute",
                         bottom: "0px",
                         textAlign: "center",
                         width: "100%",
-                        height: "50px",
+                        height: "auto",
                     }}>
-                    <button id="export" className="button" onClick={this._onExport.bind(this)}>Export</button>
-                    <button id="import" className="button" onClick={this._onImport.bind(this)}>Import</button>
+                    <div id="export_import">
+                        <button id="export" className="button" onClick={this._onExport.bind(this)}>Export</button>
+                        <button id="import" className="button" onClick={this._onImport.bind(this)}>Import</button>
+                    </div>
+                    {
+                        common.context.version ? (
+                            <div id="version">
+                            {
+                                `Version: ${common.context.version}`
+                            }
+                            </div>
+                        ) : (
+                            null
+                        )
+                    }
                 </div>
             </div>
             
