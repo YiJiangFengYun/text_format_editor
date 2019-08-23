@@ -238,8 +238,6 @@ export class Edit extends React.Component<{}, {
         let brCount = brs.length;
         let brStart = 0;
         
-        let brElementCount = 0;
-
         let result: JSX.Element[] = [];
         result.length = formatCount;
         for (let i = 0; i < formatCount; ++i) {
@@ -273,7 +271,6 @@ export class Edit extends React.Component<{}, {
                         subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
                     }
                     subResult.push(<br key={`r${textVersion}_br${j + 1}`}/>);
-                    ++brElementCount;
                     subBegin = index;
                     brStart = j + 1;
                 } else {
