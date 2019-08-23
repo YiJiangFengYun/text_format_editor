@@ -75,7 +75,7 @@ export class Edit extends React.Component<{}, {
                     height: "100%",
                     verticalAlign: "top",
                     boxSizing: "border-box",
-                    position: "absolute",
+                    // position: "absolute",
                     backgroundColor: state.backgroundColor,
                     color: state.color,
                     fontSize: state.size,
@@ -202,7 +202,7 @@ export class Edit extends React.Component<{}, {
                         </img>
                     </div>
                 </div>
-                <div id="export"
+                <div id="export_import"
                     style={{
                         position: "absolute",
                         bottom: "0px",
@@ -211,6 +211,7 @@ export class Edit extends React.Component<{}, {
                         height: "50px",
                     }}>
                     <button onClick={this._onExport.bind(this)}>Export</button>
+                    <button onClick={this._onImport.bind(this)}>Import</button>
                 </div>
             </div>
             
@@ -301,6 +302,9 @@ export class Edit extends React.Component<{}, {
                 continue;
             } else if (node.nodeName === "#text") {
                 //When all words of the text is deleted then input words, words will be as pure text.
+                if (typeof node.nodeValue !== "string") {
+                    throw new Error("The nodeValue of node is not a string.");
+                }
                 let data: modFormatText.Data = modFormatText.create(
                     node.nodeValue, 
                     this.state.size,
@@ -332,6 +336,9 @@ export class Edit extends React.Component<{}, {
                     } else {
                         text += childNode.nodeValue;
                     }
+                }
+                if (typeof text !== "string") {
+                    throw new Error("The final text is not a string.");
                 }
                 data.text = text;
                 let format: modFormatText.Format = { begin: 0, end: text.length, types: 0 };
@@ -722,5 +729,15 @@ export class Edit extends React.Component<{}, {
 
     private _onExport() {
         common.dataExport.export();
+    }
+
+    private _onImport() {
+        let context = this;
+        common.dataImport.import()
+        .then((res) => {
+            if (res) {
+                context.forceUpdate();
+            }
+        });
     }
 }
