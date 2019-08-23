@@ -1,4 +1,5 @@
 import * as electron from "electron";
+import * as log from 'loglevel';
 import * as util from "../../util";
 import * as model from "../model";
 
@@ -13,7 +14,7 @@ export class Import {
             if (res.filePaths && res.filePaths.length > 0)
             {
                 let filePath = res.filePaths[0];
-                console.info(`Open file ${filePath}.`);
+                log.info(`Open file ${filePath}.`);
                 return util.JsonIO.readJSON(filePath)
             } else {
                 return null;
@@ -21,7 +22,7 @@ export class Import {
         })
         .then((data) => {
             if (data) {
-                console.info("Result imported is: " + JSON.stringify(data));
+                log.info("Result imported is: " + JSON.stringify(data));
                 model.model.formatText.init(data);
                 return true;
             } else {

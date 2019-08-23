@@ -1,5 +1,6 @@
 import * as electron from "electron";
 import * as path from "path";
+import * as log from 'loglevel';
 import * as util from "../../util";
 import * as model from "../model";
 
@@ -16,7 +17,7 @@ export class Export {
             if (res.filePath && ! res.canceled) {
                 let filePath = res.filePath;
                 let data = model.model.formatText.data;
-                console.info("Result exported is: " + JSON.stringify(data));
+                log.info("Result exported is: " + JSON.stringify(data));
                 return util.JsonIO.writeJSON(filePath, data);
             } else {
                 return null;

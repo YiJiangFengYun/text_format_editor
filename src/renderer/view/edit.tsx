@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as log from 'loglevel';
 import * as modFormatText from "format_text";
 import * as model from "../model";
 import * as common from "../common";
@@ -15,7 +16,7 @@ function tranColorStringToNumber(colorStr: string) {
         let arr = colorStr.split(",");
         return (Number(arr[0]) << 16) | (Number(arr[1]) << 8) | Number(arr[2]);
     } else {
-        console.error(`Unkown color string: ${colorStr}`);
+        log.error(`Unkown color string: ${colorStr}`);
         return 0;
     }
 }
@@ -221,7 +222,6 @@ export class Edit extends React.Component<{}, {
     }
 
     private _toTextElements(textVersion: number) {
-        console.log("To text elements: ");
         let formatText = model.model.formatText;
         let data = formatText.data;
         let text = data.text;
@@ -243,7 +243,6 @@ export class Edit extends React.Component<{}, {
             let style: React.CSSProperties = {};
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.COLOR)) {
                 let colorStr = tranColorNumberToString(format.color);
-                console.log(`Color string: ${colorStr}`);
                 style.color = colorStr;
             }
             if (format.types & modFormatText.getFormatTypeBits(modFormatText.FormatType.SIZE)) {
@@ -265,10 +264,8 @@ export class Edit extends React.Component<{}, {
                     if (subBegin !== index) {
                         let temp = text.substring(subBegin, index);
                         subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
-                        console.log(temp);
                     }
                     subResult.push(<br key={`r${textVersion}_br${j + 1}`}/>);
-                    console.log("br");
                     ++brElementCount;
                     subBegin = index;
                     brStart = j + 1;
@@ -279,18 +276,14 @@ export class Edit extends React.Component<{}, {
             }
             let temp = text.substring(subBegin, subEnd);
             subResult.push(<span className="text_span" key={`r${textVersion}_span${subBegin}`}>{temp}</span>);
-            console.log(temp);
             
             result[i] = <span className="text_style_span" key={`r${textVersion}_stylespan${i + 1}`} style={style}>{subResult}</span>;
         }
-
-        console.log(`Break element ${brElementCount}`);
 
         return result;
     }
 
     private _fromTextElements() {
-        console.log("From text elements: ");
         let childNodesOfTextArea = this._refTextArea.current.childNodes;
         let formatText = model.model.formatText;
         let datas: modFormatText.Data[] = [];
@@ -366,7 +359,6 @@ export class Edit extends React.Component<{}, {
         for (let i = 1; i < len; ++i) {
             formatText.append(datas[i]);
         }
-        console.log(`Format text: ${formatText.toString()}`);
         this._upTextVersion();
     }
 
@@ -425,11 +417,11 @@ export class Edit extends React.Component<{}, {
         let focusNode = selection.focusNode;
         let focusOffset = selection.focusOffset;
         if (! anchorNode || anchorNode.nodeName !== "#text") {
-            console.warn("Anchor Node of the selection is not a text node.");
+            log.warn("Anchor Node of the selection is not a text node.");
             return null;
         }
         if (! focusNode || focusNode.nodeName !== "#text") {
-            console.warn("Focus Node of the selection is not a text node.");
+            log.warn("Focus Node of the selection is not a text node.");
             return null;
         }
         function chilrenIndexOf(children: NodeListOf<ChildNode>, node: Node) {
@@ -445,22 +437,22 @@ export class Edit extends React.Component<{}, {
             let textAreaNode = this._refTextArea.current;
             let spanAnchor = anchorNode.parentNode as HTMLSpanElement;
             if (! spanAnchor.classList.contains("text_span")) {
-                console.warn("Selection anchor is not in a text span.");
+                log.warn("Selection anchor is not in a text span.");
                 return null;
             }
             let spanFocus = focusNode.parentNode as HTMLSpanElement;
             if (! spanFocus.classList.contains("text_span")) {
-                console.warn("Selection focus is not in a text span.");
+                log.warn("Selection focus is not in a text span.");
                 return null;
             }
             let styleSpanAnchor = spanAnchor.parentNode as HTMLSpanElement;
             if (! styleSpanAnchor.classList.contains("text_style_span")) {
-                console.warn("Selection anchor is not in a text style span.");
+                log.warn("Selection anchor is not in a text style span.");
                 return null;
             }
             let styleSpanFocus = spanFocus.parentNode as HTMLSpanElement;
             if (! styleSpanFocus.classList.contains("text_style_span")) {
-                console.warn("Selection focus is not in a text style span.");
+                log.warn("Selection focus is not in a text style span.");
                 return null;
             }
             let indexAnchor = chilrenIndexOf(styleSpanAnchor.childNodes, spanAnchor);
@@ -626,9 +618,6 @@ export class Edit extends React.Component<{}, {
 
                 postStr = beginStr + endStr;
             }
-
-             console.log(`Pre string: ${preStr}`);
-             console.log(`Post string: ${postStr}`);
 
              begin = preStr.length;
              end = model.model.formatText.data.text.length - postStr.length;
