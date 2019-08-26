@@ -226,7 +226,7 @@ export class Edit extends React.Component<{}, {
                         common.context.version ? (
                             <div id="version">
                             {
-                                `Version: ${common.context.version}`
+                                `Version ${common.context.version}`
                             }
                             </div>
                         ) : (
