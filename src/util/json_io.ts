@@ -1,10 +1,10 @@
 import * as fs from "fs";
 
 export class JsonIO {
-    public static readFile(filePath: string, encoding: string) {
+    public static readFile(filePath: string, encoding: BufferEncoding) {
         return new Promise<string>((fulfill, reject) => {
             try {
-                let res = fs.readFileSync(filePath, encoding);
+                let res = fs.readFileSync(filePath, { encoding });
                 fulfill(res);
             } catch (err) {
                 reject(err);
@@ -12,7 +12,7 @@ export class JsonIO {
         });
     }
 
-    public static writeFile(filePath:string, data: any, encoding: string) {
+    public static writeFile(filePath:string, data: any, encoding: BufferEncoding) {
         return new Promise<void>((resolve, reject) => {
             try {
                 fs.writeFileSync(

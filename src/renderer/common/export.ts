@@ -4,13 +4,11 @@ import * as log from 'loglevel';
 import * as util from "../../util";
 import * as model from "../model";
 
-const DEFAULT_PATH = path.join(electron.remote.app.getPath("desktop"), "data.json");
-
 export class Export {
     public export() {
         return electron.remote.dialog.showSaveDialog({
             title: "Export",
-            defaultPath: DEFAULT_PATH,
+            defaultPath: path.join(electron.remote.app.getPath("desktop"), "data.json"),
             buttonLabel: "Export",
         })
         .then((res) => {
