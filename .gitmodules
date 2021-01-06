@@ -1,0 +1,3 @@
+[submodule "format_text"]
+	path = format_text
+	url = git@github.com:YiJiangFengYun/format_text.git
