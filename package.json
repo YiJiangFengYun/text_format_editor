@@ -39,7 +39,7 @@
   "dependencies": {
     "eventemitter3": "^4.0.7",
     "format_text": "./format_text",
-    "log4js": "^6.3.0",
+    "log4js": "^6.4.0",
     "loglevel": "^1.7.1"
   }
 }
